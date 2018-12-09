@@ -1,0 +1,7 @@
+[package]
+name = "day4"
+version = "0.1.0"
+authors = ["AntoineDupre <dupre.antoine.niclas@gmail.com>"]
+
+[dependencies]
+chrono = "*"
