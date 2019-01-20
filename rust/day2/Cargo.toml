@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["antdup <antoine.dupre@maxiv.lu.se>"]
 
 [dependencies]
+chrono

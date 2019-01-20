@@ -5,3 +5,4 @@ authors = ["AntoineDupre <dupre.antoine.niclas@gmail.com>"]
 
 [dependencies]
 chrono = "*"
+regex = "*"

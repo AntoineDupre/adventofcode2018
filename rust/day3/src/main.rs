@@ -21,8 +21,6 @@ use std::io;
 use std::fs;
 use std::collections::HashMap;
 
-const FABRIC_SIZE: usize = 1000;
-
 
 struct Claim{
     id: i32,
@@ -58,34 +56,43 @@ impl Claim{
 
 
     // Note: https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md
-    fn iterate_cell(&self) -> impl Iterator<Item = (i32, i32)> + '_ {
+    fn iterate_cell(&self) -> impl Iterator<Item = (i32, i32, i32)> + '_ {
         // Return an iterator that contains all the cells coordinates orccupied by the claim
         // Note: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.flat_map
-        (self.x..self.x+self.width).flat_map(move |x| (self.y..self.y+self.height).map(move |y| (x, y)))
+        (self.x..self.x+self.width).flat_map(move |x| (self.y..self.y+self.height).map(move |y| (x, y, self.id)))
     }
 }
 
 
 struct Fabric{
     used_squares: HashMap<(i32, i32), i32>,
+    claims_map: HashMap<(i32, i32), Vec<i32>>
 }
 
 impl Fabric{
     fn new(f: &str) -> Fabric{
         let mut used_squares = HashMap::new();
+        let mut claims_map = HashMap::new();
         f.lines()
             .map(|word| Claim::new(word))
             .for_each(|c| {
-                c.iterate_cell().for_each(|(x, y)|{
+                c.iterate_cell().for_each(|(x, y, id)|{
                     // For each cell used by this claim, increment the
                     // factory<x,y> cell count.
                     let count = used_squares.entry((x, y)).or_insert(0);
                     *count += 1;
+                    //let c = claims_colisions.entry(id).or_insert(0);
+                    //if *count > 2 {
+                    //    *c += 1
+                    //}
+
+                    let claim = claims_map.entry((x, y)).or_insert(Vec::new());
+                    claim.push(id);
                 })
             });
-        Fabric { used_squares }
+        Fabric { used_squares, claims_map}
 }
-    fn collision(&self) -> i32{
+    fn collision_count(&self) -> i32{
         let mut duplicates = 0;
         for v in self.used_squares.values(){
             if *v > 1 {
@@ -94,8 +101,16 @@ impl Fabric{
         }
         return duplicates
     }
+    fn no_collisition_id(&self) {
+        //let mut output = Vec::new();
+        for (k, v) in self.claims_map.iter()
+            .filter(|&(k, v)| v.len() < 2){
+                //output.push(*v);
+                println!("{:?}", v);
+            }
+    }
 }
-
+// split dans deux ficheir
 
 fn main() {
     // Read input file
@@ -103,5 +118,5 @@ fn main() {
     // Build a fabric
     let fabric  = Fabric::new(&f);
     // Display collistions.
-    println!("collision {}", fabric.collision());
+    println!("collision {} {:?}", fabric.collision_count(), fabric.no_collisition_id());
 }
